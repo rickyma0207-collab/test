@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>用户主页</title>
+  <link rel="stylesheet" href="/css/app.css" />
+</head>
+<body>
+  <div class="page">
+    <div class="dashboard">
+      <div class="dashboard-card">
+        <div class="dashboard-header">
+          <div class="avatar" id="avatar">U</div>
+          <button class="btn btn-outline" id="logoutBtn" type="button">退出登录</button>
+        </div>
+
+        <div class="welcome">
+          <h1>你好，<span id="displayName">用户</span></h1>
+          <p>你已通过数据库验证，欢迎进入系统主页。</p>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <div class="label">用户 ID</div>
+            <div class="value" id="userId">-</div>
+          </div>
+          <div class="stat">
+            <div class="label">用户名</div>
+            <div class="value" id="userName">-</div>
+          </div>
+          <div class="stat">
+            <div class="label">登录状态</div>
+            <div class="value" style="color: var(--success)">已登录</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const raw = sessionStorage.getItem('user')
+    if (!raw) {
+      location.href = '/'
+    } else {
+      const user = JSON.parse(raw)
+      document.getElementById('displayName').textContent = user.username
+      document.getElementById('userId').textContent = user.id
+      document.getElementById('userName').textContent = user.username
+      document.getElementById('avatar').textContent = user.username.slice(0, 1).toUpperCase()
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      sessionStorage.removeItem('user')
+      location.href = '/'
+    })
+  </script>
+</body>
+</html>

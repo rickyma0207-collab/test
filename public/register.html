@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>用户注册</title>
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+  <div class="page">
+    <div class="shell">
+      <section class="hero">
+        <div>
+          <span class="badge">新建账户</span>
+          <h1>注册新用户，<br />自动写入数据库</h1>
+          <p>提交后，后端会把用户名和密码插入 MySQL 的 user_db.users 表，之后即可用该账号登录。</p>
+        </div>
+        <ul>
+          <li>用户名不可重复（数据库 UNIQUE 约束）</li>
+          <li>密码至少 6 位</li>
+          <li>注册成功后可立即登录</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>注册</h2>
+        <p class="subtitle">填写信息后将保存到数据库</p>
+
+        <form id="registerForm">
+          <div class="field">
+            <label for="username">用户名</label>
+            <input id="username" type="text" placeholder="3～30 个字符" autocomplete="username" required minlength="3" maxlength="30" />
+          </div>
+          <div class="field">
+            <label for="password">密码</label>
+            <input id="password" type="password" placeholder="至少 6 位" autocomplete="new-password" required minlength="6" />
+          </div>
+          <div class="field">
+            <label for="confirm">确认密码</label>
+            <input id="confirm" type="password" placeholder="再次输入密码" autocomplete="new-password" required minlength="6" />
+          </div>
+          <button class="btn" type="submit" id="submitBtn">注 册</button>
+        </form>
+
+        <p class="form-footer">
+          已有账号？<a href="login.html" id="loginLink">去登录</a>
+        </p>
+      </section>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <script src="js/api.js"></script>
+  <script>
+    function showToast(message, type = 'success') {
+      const el = document.getElementById('toast')
+      el.textContent = message
+      el.className = `toast show ${type}`
+      clearTimeout(showToast.timer)
+      showToast.timer = setTimeout(() => { el.className = 'toast' }, 2800)
+    }
+
+    checkServer().then((ok) => {
+      if (!ok) showServerError(showToast)
+    })
+
+    const form = document.getElementById('registerForm')
+    const submitBtn = document.getElementById('submitBtn')
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const username = document.getElementById('username').value.trim()
+      const password = document.getElementById('password').value
+      const confirm = document.getElementById('confirm').value
+
+      if (password !== confirm) {
+        showToast('两次输入的密码不一致', 'error')
+        return
+      }
+
+      submitBtn.disabled = true
+      submitBtn.textContent = '注册中...'
+
+      try {
+        const data = await apiPost('/api/register', { username, password })
+
+        if (data.code === 200) {
+          showToast('注册成功，正在跳转登录页...', 'success')
+          setTimeout(() => {
+            location.href = API_BASE + '/'
+          }, 800)
+        } else {
+          showToast(data.msg || '注册失败', 'error')
+        }
+      } catch {
+        showServerError(showToast)
+      } finally {
+        submitBtn.disabled = false
+        submitBtn.textContent = '注 册'
+      }
+    })
+  </script>
+</body>
+</html>
